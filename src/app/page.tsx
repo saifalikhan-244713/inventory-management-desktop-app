@@ -1,5 +1,5 @@
-import Sidebar from "@/components/Sidebar";
-import InventoryDashboard from "@/components/Inventory-dashboard";
+import {Sidebar} from "@/app/components/Sidebar";
+import {InventoryDashboard} from "@/app/components/Inventory-dashboard";
 
 export default function Home() {
   return (
