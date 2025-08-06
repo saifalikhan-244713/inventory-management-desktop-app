@@ -2,6 +2,18 @@ import { NextResponse } from "next/server";
 import { connectToDB } from "@/app/lib/db";
 import { Inventory } from "@/app/lib/models/inventory";
 
+// GET: fetch inventory items
+export async function GET() {
+  try {
+    await connectToDB();
+    const items = await Inventory.find().sort({ createdAt: -1 });
+    return NextResponse.json(items);
+  } catch (err) {
+    return NextResponse.json({ error: "Failed to fetch inventory" }, { status: 500 });
+  }
+}
+
+// POST: add new inventory item
 export async function POST(req: Request) {
   try {
     await connectToDB();
@@ -16,7 +28,6 @@ export async function POST(req: Request) {
       pricePerQuantity,
     } = body;
 
-    // Basic validation
     if (
       !serialNo ||
       !productName ||
@@ -25,18 +36,12 @@ export async function POST(req: Request) {
       !category ||
       pricePerQuantity == null
     ) {
-      return NextResponse.json(
-        { error: "All fields are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
     }
 
     const existing = await Inventory.findOne({ serialNo });
     if (existing) {
-      return NextResponse.json(
-        { error: "Item with this serial number already exists" },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: "Item with this serial number already exists" }, { status: 409 });
     }
 
     const item = await Inventory.create({
@@ -50,10 +55,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json(item, { status: 201 });
   } catch (err) {
-    console.error("Error adding inventory:", err);
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
   }
 }

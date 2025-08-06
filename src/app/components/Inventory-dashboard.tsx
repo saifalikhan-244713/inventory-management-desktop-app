@@ -2,14 +2,13 @@
 
 import { useState, useMemo } from "react";
 import { Search, Filter, Download, Plus, ChevronDown } from "lucide-react";
-import InventoryTable  from "@/app/components/Inventory-table";
-import {AddItemModal} from "@/app/components/Add-item-modal"; // Import the new modal
-import { inventoryData as initialInventoryData } from "@/app/lib/mock-data"; // Rename import
+import InventoryTable from "@/app/components/Inventory-table";
+import { AddItemModal } from "@/app/components/Add-item-modal"; // Import the new modal
+import { useEffect } from "react";
 import type { InventoryItem } from "@/app/lib/types"; // Import InventoryItem type
 
 export function InventoryDashboard() {
-  const [inventoryItems, setInventoryItems] =
-    useState<InventoryItem[]>(initialInventoryData); // Use state for inventory data
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [brandFilter, setBrandFilter] = useState("all");
@@ -56,16 +55,22 @@ export function InventoryDashboard() {
   };
 
   const handleAddItem = (newItem: InventoryItem) => {
-    // In a real app, you'd send this to your backend API
-    // For now, we'll just add it to the local state with a mock ID
-    setInventoryItems((prevItems) => [
-      ...prevItems,
-      {
-        ...newItem,
-        _id: `mock-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      },
-    ]);
+    setInventoryItems((prev) => [...prev, newItem]); // real item from backend
   };
+
+  useEffect(() => {
+    const fetchInventory = async () => {
+      try {
+        const res = await fetch("/api/inventory");
+        const data = await res.json();
+        setInventoryItems(data);
+      } catch (error) {
+        console.error("Failed to fetch inventory:", error);
+      }
+    };
+
+    fetchInventory();
+  }, []);
 
   return (
     <div className="flex flex-col h-full">
